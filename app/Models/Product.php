@@ -16,4 +16,13 @@ class Product
         return Storage::disk(self::$disk)->json(self::$file);
     }
 
+    public static function delete($id)
+    {
+        $products = self::all();
+        $products = array_filter($products, function ($product) use ($id) {
+            return $product['id'] != $id;
+        });
+        Storage::disk(self::$disk)->put(self::$file,json_encode($products));
+    }
+
 }
