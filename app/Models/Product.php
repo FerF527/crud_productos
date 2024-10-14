@@ -22,7 +22,17 @@ class Product
         $products = array_filter($products, function ($product) use ($id) {
             return $product['id'] != $id;
         });
-        Storage::disk(self::$disk)->put(self::$file,json_encode($products));
+        Storage::disk(self::$disk)->put(self::$file,json_encode($products, JSON_PRETTY_PRINT));
+    }
+
+    public static function create($data)
+    {
+        $products = self::all();
+        $data['id'] = end($products)['id'] + 1;
+        $data['created_at'] = now()->format('Y-m-d H:i');
+        $products[] = $data;
+        Storage::disk(self::$disk)->put(self::$file,json_encode($products, JSON_PRETTY_PRINT));
+        return $data;
     }
 
 }
