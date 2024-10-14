@@ -57,7 +57,14 @@ class ProductController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $validated = $request->validate([
+            'title' => 'sometimes|required|string|max:255',
+            'price' => 'sometimes|required|numeric',
+        ]);
+
+        Product::update($id, $validated);
+
+        return response()->json(['message' => 'Producto actualizado']);
     }
 
     /**

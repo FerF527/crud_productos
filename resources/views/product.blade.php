@@ -27,6 +27,7 @@
         <tbody></tbody>
     </table>
 
+    <script src="/js/sweetalert/swal2.js"></script>
     <script>
         //Obtener todos los productos
         function getProducts() {
@@ -42,7 +43,7 @@
                                 <td>${product.price}</td>
                                 <td>${product.created_at}</td>
                                 <td>
-                                    <button>Editar</button>
+                                    <button onclick="editProduct(${product.id}, '${product.title}', ${product.price})">Editar</button>
                                     <button onclick="deleteProduct(${product.id})">Borrar</button>
                                 </td>
                             </tr>`;
@@ -68,7 +69,7 @@
             const price = document.getElementById('price').value;
 
             if (!title || !price) {
-                alert("Por favor, completa ambos campos.");
+                Swal.fire("Por favor, complete el campo Nombre y Precio.");
                 return;
             }
 
@@ -92,8 +93,59 @@
             document.getElementById('price').value = '';
         }
 
+        //Editar producto
+
+        function editProduct(id, title, price) {
+            Swal.fire({
+                title: 'Editar Producto',
+                html: `
+                        <label for="editTitle">Nombre</label>
+                        <input type="text" id="editTitle" class="swal2-input" value="${title}">
+
+                        <label for="editPrice">Precio</label>
+                        <input type="number" id="editPrice" class="swal2-input" value="${price}">
+                `,
+                focusConfirm: false,
+                showCancelButton: true,
+                confirmButtonText: 'Guardar',
+                preConfirm: () => {
+                    const newTitle = document.getElementById('editTitle').value;
+                    const newPrice = document.getElementById('editPrice').value;
+
+                    if (!newTitle || !newPrice) {
+                        Swal.showValidationMessage('Por favor, complete el campo Nombre y Precio.');
+                    } else {
+                        return {
+                            title: newTitle,
+                            price: newPrice
+                        };
+                    }
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Realizar la petición PUT para actualizar el producto
+                    fetch(`/product/${id}`, {
+                            method: 'PUT',
+                            headers: {
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                title: result.value.title,
+                                price: result.value.price
+                            })
+                        })
+                        .then(response => response.json())
+                        .then(() => {
+                            Swal.fire('Actualizado', 'El producto ha sido actualizado', 'success');
+                            getProducts();
+                        });
+                }
+            });
+        }
         getProducts();
     </script>
+
 </body>
 
 </html>

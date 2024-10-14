@@ -35,4 +35,21 @@ class Product
         return $data;
     }
 
+    public static function find($id)
+    {
+        $products = self::all();
+        return collect($products)->firstWhere('id', $id);
+    }
+
+    public static function update($id, $data)
+    {
+        $products = self::all();
+        foreach ($products as &$product) {
+            if ($product['id'] == $id) {
+                $product = array_merge($product, $data);
+            }
+        }
+        Storage::disk(self::$disk)->put(self::$file,json_encode($products, JSON_PRETTY_PRINT));
+    }
+
 }
