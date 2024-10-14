@@ -8,7 +8,7 @@ use App\Models\Product;
 class ProductController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Listado de productos.
      */
     public function index()
     {
@@ -16,50 +16,26 @@ class ProductController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
+     * Crear producto.
      */
     public function store(Request $request)
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'price' => 'required|numeric',
+            'price' => 'required|numeric|min:0'
         ]);
 
         return response()->json(Product::create($validated));
     }
 
     /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
+     * Actualizar producto.
      */
     public function update(Request $request, string $id)
     {
         $validated = $request->validate([
-            'title' => 'sometimes|required|string|max:255',
-            'price' => 'sometimes|required|numeric',
+            'title' => 'required|string|max:255',
+            'price' => 'required|numeric|min:0'
         ]);
 
         Product::update($id, $validated);
@@ -68,7 +44,7 @@ class ProductController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Eliminar producto.
      */
     public function destroy(string $id)
     {

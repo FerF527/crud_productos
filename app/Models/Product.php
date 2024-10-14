@@ -7,7 +7,9 @@ class Product
 {
     private static $disk = "local";
     private static $file = "product.json";
-
+    /**
+     * Listado de productos.
+     */
     public static function all()
     {
         if (!Storage::disk(self::$disk)->exists(self::$file)) {
@@ -16,6 +18,9 @@ class Product
         return Storage::disk(self::$disk)->json(self::$file);
     }
 
+    /**
+     * Eliminar producto.
+     */
     public static function delete($id)
     {
         $products = self::all();
@@ -25,6 +30,9 @@ class Product
         Storage::disk(self::$disk)->put(self::$file,json_encode($products, JSON_PRETTY_PRINT));
     }
 
+    /**
+     * Crear producto.
+     */
     public static function create($data)
     {
         $products = self::all();
@@ -35,12 +43,18 @@ class Product
         return $data;
     }
 
+    /**
+     * Producto por id.
+     */
     public static function find($id)
     {
         $products = self::all();
         return collect($products)->firstWhere('id', $id);
     }
 
+    /**
+     * Actualizar producto.
+     */
     public static function update($id, $data)
     {
         $products = self::all();

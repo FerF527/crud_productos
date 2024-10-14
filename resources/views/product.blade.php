@@ -123,7 +123,6 @@
                 }
             }).then((result) => {
                 if (result.isConfirmed) {
-                    // Realizar la petición PUT para actualizar el producto
                     fetch(`/product/${id}`, {
                             method: 'PUT',
                             headers: {
