@@ -52,6 +52,12 @@ return [
     */
 
     'channels' => [
+        //logs de crud de producto
+        'product_logs' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/product.log'),
+            'level' => 'info',
+        ],
         'stack' => [
             'driver' => 'stack',
             'channels' => ['single'],

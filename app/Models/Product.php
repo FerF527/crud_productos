@@ -2,6 +2,8 @@
 
 namespace App\Models;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
+use Carbon\Carbon;
 
 class Product
 {
@@ -24,10 +26,27 @@ class Product
     public static function delete($id)
     {
         $products = self::all();
+        $deleted_product = [];
+        
+        foreach ($products as &$product) {
+            if ($product['id'] == $id) {
+                $deleted_product = $product;
+            }
+        }
+
         $products = array_filter($products, function ($product) use ($id) {
             return $product['id'] != $id;
         });
+
+
         Storage::disk(self::$disk)->put(self::$file,json_encode($products, JSON_PRETTY_PRINT));
+        // Registrar la acción en los logs
+        Log::channel('product_logs')->info('Producto eliminado', [
+            'id' => $deleted_product['id'],
+            'title' => $deleted_product['title'],
+            'price' => $deleted_product['price'],
+            'deleted_at' => Carbon::now()->toDateTimeString()
+        ]);
     }
 
     /**
@@ -40,6 +59,13 @@ class Product
         $data['created_at'] = now()->format('Y-m-d H:i');
         $products[] = $data;
         Storage::disk(self::$disk)->put(self::$file,json_encode($products, JSON_PRETTY_PRINT));
+        // Registrar la acción en los logs
+        Log::channel('product_logs')->info('Producto agregado', [
+            'id' => $data['id'],
+            'title' => $data['title'],
+            'price' => $data['price'],
+            'created_at' => $data['created_at']
+        ]);
         return $data;
     }
 
@@ -64,6 +90,13 @@ class Product
             }
         }
         Storage::disk(self::$disk)->put(self::$file,json_encode($products, JSON_PRETTY_PRINT));
+        // Registrar la acción en los logs
+        Log::channel('product_logs')->info('Producto actualizado', [
+            'id' => intval($id),
+            'title' => $data['title'],
+            'price' => $data['price'],
+            'updated_at'=> Carbon::now()->toDateTimeString()
+        ]);
     }
 
 }
