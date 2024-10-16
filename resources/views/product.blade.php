@@ -10,10 +10,28 @@
 
 <body>
     <h1>Productos</h1>
+    <br>
     <h3>Agregar Producto</h3>
     <input type="text" id="title" placeholder="Nombre del producto">
     <input type="number" id="price" placeholder="Precio del producto">
     <button onclick="addProduct()">Agregar Producto</button>
+    <br>
+    <h3>Filtros</h3>
+    <label for="filterTitle">Buscar por nombre:</label>
+    <input type="text" id="filterTitle" placeholder="Nombre del producto">
+    <br>
+    <label for="filterPrice">Buscar por precio:</label>
+    <input type="number" id="filterPrice" placeholder="Precio del producto">
+    <br>
+    <label for="filterDate">Buscar por fecha:</label>
+    <input type="date" id="filterDate" placeholder="Fecha del producto">
+    <br>
+    <button onclick="applyFilters()">Buscar</button>
+    <br>
+    <h3>Paginación</h3>
+    <button id="prevPage" onclick="prevPage()" disabled>Anterior</button>
+    <button id="nextPage" onclick="nextPage()">Siguiente</button>
+    <span>Página: <span id="currentPage">1</span></span>
     <table id="productTable">
         <thead>
             <tr>
@@ -30,31 +48,70 @@
     <script src="/js/sweetalert/swal2.js"></script>
     <script src="/js/jquery/jquery.js"></script>
     <script>
+        let currentPage = 1;
+        const productsPerPage = 5;
+
+        //aplicar filtros
+        function applyFilters() {
+            currentPage = 1;
+            getProducts();
+        }
         //Obtener todos los productos
         async function getProducts() {
+            const filterTitle = $('#filterTitle').val();
+            const filterPrice = $('#filterPrice').val();
+            const filterDate = $('#filterDate').val();
+
+            const queryParams = new URLSearchParams({
+                page: currentPage,
+                per_page: productsPerPage,
+                title: filterTitle || '',
+                price: filterPrice || '',
+                date: filterDate || ''
+            });
+
             try {
-                const response = await fetch('/product');
-                const products = await response.json();
+                const response = await fetch(`/product?${queryParams.toString()}`);
+                const data = await response.json();
+                const products = data.products;
+                const totalPages = data.totalPages;
 
                 const tbody = $('#productTable tbody');
                 tbody.empty(); // Limpiar la tabla
 
                 products.forEach(product => {
                     const row = `
-                        <tr>
-                            <td>${product.id}</td>
-                            <td>${product.title}</td>
-                            <td>${product.price}</td>
-                            <td>${product.created_at}</td>
-                            <td>
-                                <button onclick="editProduct(${product.id}, '${product.title}',${product.price})">Editar</button>
-                                <button onclick="deleteProduct(${product.id})">Borrar</button>
-                            </td>
-                        </tr>`;
+                <tr>
+                    <td>${product.id}</td>
+                    <td>${product.title}</td>
+                    <td>${product.price}</td>
+                    <td>${product.created_at}</td>
+                    <td>
+                        <button onclick="editProduct(${product.id}, '${product.title}',${product.price})">Editar</button>
+                        <button onclick="deleteProduct(${product.id})">Borrar</button>
+                    </td>
+                </tr>`;
                     tbody.append(row);
                 });
+
+                // Control de paginación
+                $('#currentPage').text(currentPage);
+                $('#prevPage').prop('disabled', currentPage === 1);
+                $('#nextPage').prop('disabled', currentPage >= totalPages);
             } catch (error) {
                 Swal.fire('Error', 'Error al cargar los productos', 'error');
+            }
+        }
+
+        function nextPage() {
+            currentPage++;
+            getProducts();
+        }
+
+        function prevPage() {
+            if (currentPage > 1) {
+                currentPage--;
+                getProducts();
             }
         }
 
