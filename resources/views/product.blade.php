@@ -47,7 +47,7 @@
                             <td>${product.price}</td>
                             <td>${product.created_at}</td>
                             <td>
-                                <button>Editar</button>
+                                <button onclick="editProduct(${product.id}, '${product.title}',${product.price})">Editar</button>
                                 <button onclick="deleteProduct(${product.id})">Borrar</button>
                             </td>
                         </tr>`;
@@ -85,7 +85,7 @@
                     throw new Error(errorData.message || 'Error al eliminar el producto');
                 }
 
-                await Swal.fire('OK','El producto ha sido eliminado.', 'success');
+                await Swal.fire('OK', 'El producto ha sido eliminado.', 'success');
                 getProducts(); // Actualizar la tabla con los nuevos datos
             } catch (error) {
                 Swal.fire('Error', error.message, 'error');
@@ -109,7 +109,10 @@
                         'X-CSRF-TOKEN': '{{ csrf_token() }}',
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ title, price })
+                    body: JSON.stringify({
+                        title,
+                        price
+                    })
                 });
 
                 if (!response.ok) {
@@ -131,52 +134,58 @@
 
         //Editar producto
 
-        function editProduct(id, title, price) {
-            Swal.fire({
+        async function editProduct(id, title, price) {
+            const {
+                value: formValues
+            } = await Swal.fire({
                 title: 'Editar Producto',
                 html: `
-                        <label for="editTitle">Nombre</label>
-                        <input type="text" id="editTitle" class="swal2-input" value="${title}">
-
-                        <label for="editPrice">Precio</label>
-                        <input type="number" id="editPrice" class="swal2-input" value="${price}">
-                `,
+            <label for="editTitle">Nombre</label>
+            <input type="text" id="editTitle" class="swal2-input" value="${title}">
+            <label for="editPrice">Precio</label>
+            <input type="number" id="editPrice" class="swal2-input" value="${price}">
+        `,
                 focusConfirm: false,
                 showCancelButton: true,
                 confirmButtonText: 'Guardar',
                 preConfirm: () => {
-                    const newTitle = document.getElementById('editTitle').value;
-                    const newPrice = document.getElementById('editPrice').value;
+                    const newTitle = $('#editTitle').val();
+                    const newPrice = $('#editPrice').val();
 
                     if (!newTitle || !newPrice) {
-                        Swal.showValidationMessage('Por favor, complete el campo Nombre y Precio.');
-                    } else {
-                        return {
-                            title: newTitle,
-                            price: newPrice
-                        };
+                        Swal.showValidationMessage('Por favor, complete ambos campos.');
+                        return null;
                     }
-                }
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    fetch(`/product/${id}`, {
-                            method: 'PUT',
-                            headers: {
-                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({
-                                title: result.value.title,
-                                price: result.value.price
-                            })
-                        })
-                        .then(response => response.json())
-                        .then(() => {
-                            Swal.fire('Actualizado', 'El producto ha sido actualizado', 'success');
-                            getProducts();
-                        });
+
+                    return {
+                        title: newTitle,
+                        price: newPrice
+                    };
                 }
             });
+
+            if (formValues) {
+                try {
+                    const response = await fetch(`/product/${id}`, {
+                        method: 'PUT',
+                        headers: {
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(formValues)
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Error al actualizar el producto');
+                    }
+
+                    const result = await response.json();
+                    Swal.fire('Actualizado', 'El producto ha sido actualizado correctamente.', 'success');
+                    getProducts(); // Actualizar la lista de productos
+                } catch (error) {
+                    Swal.fire('Error', error.message, 'error');
+                }
+            }
         }
         getProducts();
     </script>
