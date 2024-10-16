@@ -59,14 +59,37 @@
         }
 
         //Eliminar un producto
-        function deleteProduct(id) {
-            fetch(`/product/${id}`, {
-                method: 'DELETE',
-                headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                    'Content-Type': 'application/json'
+        async function deleteProduct(id) {
+            const confirmDelete = await Swal.fire({
+                title: '¿Estás seguro?',
+                text: "No podrás revertir esto!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Sí, eliminarlo!',
+                cancelButtonText: 'Cancelar'
+            });
+
+            if (!confirmDelete.isConfirmed) return;
+
+            try {
+                const response = await fetch(`/product/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Error al eliminar el producto');
                 }
-            }).then(() => getProducts());
+
+                await Swal.fire('OK','El producto ha sido eliminado.', 'success');
+                getProducts(); // Actualizar la tabla con los nuevos datos
+            } catch (error) {
+                Swal.fire('Error', error.message, 'error');
+            }
         }
 
         // Agregar producto

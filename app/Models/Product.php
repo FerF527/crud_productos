@@ -28,16 +28,13 @@ class Product
         $products = self::all();
         $deleted_product = [];
         
-        foreach ($products as &$product) {
+        foreach ($products as $index => $product) {
             if ($product['id'] == $id) {
                 $deleted_product = $product;
+                unset($products[$index]);
+                break;
             }
         }
-
-        $products = array_filter($products, function ($product) use ($id) {
-            return $product['id'] != $id;
-        });
-
 
         Storage::disk(self::$disk)->put(self::$file,json_encode($products, JSON_PRETTY_PRINT));
         // Registrar la acción en los logs
