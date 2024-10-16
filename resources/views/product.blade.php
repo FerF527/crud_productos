@@ -28,28 +28,34 @@
     </table>
 
     <script src="/js/sweetalert/swal2.js"></script>
+    <script src="/js/jquery/jquery.js"></script>
     <script>
         //Obtener todos los productos
-        function getProducts() {
-            fetch('/product')
-                .then(response => response.json())
-                .then(products => {
-                    const tbody = document.querySelector('#productTable tbody');
-                    tbody.innerHTML = '';
-                    products.forEach(product => {
-                        const row = `<tr>
-                                <td>${product.id}</td>
-                                <td>${product.title}</td>
-                                <td>${product.price}</td>
-                                <td>${product.created_at}</td>
-                                <td>
-                                    <button onclick="editProduct(${product.id}, '${product.title}', ${product.price})">Editar</button>
-                                    <button onclick="deleteProduct(${product.id})">Borrar</button>
-                                </td>
-                            </tr>`;
-                        tbody.innerHTML += row;
-                    });
+        async function getProducts() {
+            try {
+                const response = await fetch('/product');
+                const products = await response.json();
+
+                const tbody = $('#productTable tbody');
+                tbody.empty(); // Limpiar la tabla
+
+                products.forEach(product => {
+                    const row = `
+                        <tr>
+                            <td>${product.id}</td>
+                            <td>${product.title}</td>
+                            <td>${product.price}</td>
+                            <td>${product.created_at}</td>
+                            <td>
+                                <button>Editar</button>
+                                <button onclick="deleteProduct(${product.id})">Borrar</button>
+                            </td>
+                        </tr>`;
+                    tbody.append(row);
                 });
+            } catch (error) {
+                Swal.fire('Error', 'Error al cargar los productos', 'error');
+            }
         }
 
         //Eliminar un producto
@@ -64,33 +70,40 @@
         }
 
         // Agregar producto
-        function addProduct() {
-            const title = document.getElementById('title').value;
-            const price = document.getElementById('price').value;
+        async function addProduct() {
+            const title = $('#title').val();
+            const price = $('#price').val();
 
             if (!title || !price) {
                 Swal.fire("Por favor, complete el campo Nombre y Precio.");
                 return;
             }
 
-            fetch('/product', {
+            try {
+                const response = await fetch('/product', {
                     method: 'POST',
                     headers: {
                         'X-CSRF-TOKEN': '{{ csrf_token() }}',
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({
-                        title,
-                        price
-                    })
-                }).then(response => response.json())
-                .then(product => {
-                    getProducts();
+                    body: JSON.stringify({ title, price })
                 });
 
-            // Limpiar los campos del formulario
-            document.getElementById('title').value = '';
-            document.getElementById('price').value = '';
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Error al agregar el producto');
+                }
+
+                const product = await response.json();
+                Swal.fire('Producto agregado correctamente', `El producto ${product.title} fue agregado.`, 'success');
+                getProducts(); // Actualizar la tabla con los nuevos datos
+
+                // Limpiar los campos del formulario
+                $('#title').val('');
+                $('#price').val('');
+            } catch (error) {
+                Swal.fire('Error', error.message, 'error');
+            }
         }
 
         //Editar producto

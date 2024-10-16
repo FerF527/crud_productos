@@ -20,12 +20,21 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'price' => 'required|numeric|min:0'
-        ]);
-
-        return response()->json(Product::create($validated));
+        try {
+            // Validar los datos de entrada
+            $validated = $request->validate([
+                'title' => 'required|string|max:255',
+                'price' => 'required|numeric|min:0'
+            ]);
+            // Crear el producto
+            $product = Product::create($validated);
+    
+            return response()->json($product, 201); // Devuelve el producto creado con código 201 (creado)
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json(['message' => 'Error de validación', 'errors' => $e->errors()], 422);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Error al procesar la solicitud' . $e->getMessage()], 500);
+        }
     }
 
     /**
