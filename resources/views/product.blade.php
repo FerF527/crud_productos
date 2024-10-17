@@ -185,14 +185,35 @@
                     })
                 });
 
+                const responseData = await response.json();
+
                 if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.message || 'Error al agregar el producto');
+                    // Recolectar los errores de validación en un solo mensaje
+                    let errorMessages = '';
+                    if (responseData.errors) {
+                        for (const field in responseData.errors) {
+                            if (responseData.errors.hasOwnProperty(field)) {
+                                responseData.errors[field].forEach(error => {
+                                    errorMessages += `<li style="color: red">${error}</li>`;
+                                });
+                            }
+                        }
+                    }
+
+                    // Mostrar los errores
+                    Swal.fire({
+                        icon: 'error',
+                        title: responseData.message || 'Error al agregar el producto',
+                        html: `<ul>${errorMessages}</ul>`,
+                    });
+
+                    return;
                 }
 
-                const product = await response.json();
-                Swal.fire('Producto agregado correctamente', `El producto ${product.title} fue agregado.`, 'success');
-                getProducts(); // Actualizar la tabla con los nuevos datos
+                // Si no hay errores, mostrar el éxito
+                Swal.fire('Producto agregado correctamente', `El producto ${responseData.title} fue agregado.`,
+                    'success');
+                getProducts();
 
                 // Limpiar los campos del formulario
                 $('#title').val('');

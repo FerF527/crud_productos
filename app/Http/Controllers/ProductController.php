@@ -56,7 +56,7 @@ class ProductController extends Controller
         try {
             // Validar los datos de entrada
             $validated = $request->validate([
-                'title' => 'required|string|max:255',
+                'title' => 'required|string|max:100',
                 'price' => 'required|numeric|min:0',
             ]);
             // Crear el producto
@@ -76,7 +76,7 @@ class ProductController extends Controller
     public function update(Request $request, string $id)
     {
         $validated = $request->validate([
-            'title' => 'required|string|max:255',
+            'title' => 'required|string|max:100',
             'price' => 'required|numeric|min:0',
         ]);
 
