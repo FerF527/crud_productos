@@ -27,10 +27,10 @@
             <div class="form-box">
                 <label for="filterTitle">Nombre:</label>
                 <input type="text" id="filterTitle" placeholder="Nombre del producto">
-            
+
                 <label for="filterPrice">Precio:</label>
                 <input type="number" id="filterPrice" placeholder="Precio del producto">
-           
+
                 <label for="filterDate">Fecha:</label>
                 <input type="date" id="filterDate" placeholder="Fecha del producto">
             </div>
@@ -92,12 +92,13 @@
                 tbody.empty(); // Limpiar la tabla
 
                 products.forEach(product => {
+                    const formattedDate = formatDate(product.created_at);
                     const row = `
                 <tr>
                     <td>${product.id}</td>
                     <td>${product.title}</td>
                     <td>${product.price}</td>
-                    <td>${product.created_at}</td>
+                    <td>${formattedDate}</td>
                     <td>
                         <button onclick="editProduct(${product.id}, '${product.title}',${product.price})">Editar</button>
                         <button onclick="deleteProduct(${product.id})">Borrar</button>
@@ -256,6 +257,18 @@
                 }
             }
         }
+
+        // formato de fecha
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0'); // Los meses comienzan desde 0
+            const year = date.getFullYear();
+
+            return `${day}-${month}-${year}`;
+        }
+
         getProducts();
     </script>
 
