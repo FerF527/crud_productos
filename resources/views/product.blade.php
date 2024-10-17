@@ -6,44 +6,56 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <title>Productos</title>
+    <link rel="stylesheet" href="/css/product.css">
 </head>
 
 <body>
-    <h1>Productos</h1>
-    <br>
-    <h3>Agregar Producto</h3>
-    <input type="text" id="title" placeholder="Nombre del producto">
-    <input type="number" id="price" placeholder="Precio del producto">
-    <button onclick="addProduct()">Agregar Producto</button>
-    <br>
-    <h3>Filtros</h3>
-    <label for="filterTitle">Buscar por nombre:</label>
-    <input type="text" id="filterTitle" placeholder="Nombre del producto">
-    <br>
-    <label for="filterPrice">Buscar por precio:</label>
-    <input type="number" id="filterPrice" placeholder="Precio del producto">
-    <br>
-    <label for="filterDate">Buscar por fecha:</label>
-    <input type="date" id="filterDate" placeholder="Fecha del producto">
-    <br>
-    <button onclick="applyFilters()">Buscar</button>
-    <br>
-    <h3>Paginación</h3>
-    <button id="prevPage" onclick="prevPage()" disabled>Anterior</button>
-    <button id="nextPage" onclick="nextPage()">Siguiente</button>
-    <span>Página: <span id="currentPage">1</span></span>
-    <table id="productTable">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Nombre</th>
-                <th>Precio</th>
-                <th>Fecha</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody></tbody>
-    </table>
+    <div class="container">
+        <h1>Productos</h1>
+
+        <div class="form-group">
+            <h3>Agregar Producto</h3>
+            <div class="form-box">
+                <input type="text" id="title" placeholder="Nombre del producto">
+                <input type="number" id="price" placeholder="Precio del producto">
+                <button onclick="addProduct()">Agregar Producto</button>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <h3>Filtros</h3>
+            <div class="form-box">
+                <label for="filterTitle">Nombre:</label>
+                <input type="text" id="filterTitle" placeholder="Nombre del producto">
+            
+                <label for="filterPrice">Precio:</label>
+                <input type="number" id="filterPrice" placeholder="Precio del producto">
+           
+                <label for="filterDate">Fecha:</label>
+                <input type="date" id="filterDate" placeholder="Fecha del producto">
+            </div>
+            <button onclick="applyFilters()">Buscar</button>
+        </div>
+
+        <table id="productTable">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Precio</th>
+                    <th>Fecha</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+
+        <div class="pagination">
+            <button id="prevPage" onclick="prevPage()" disabled>Anterior</button>
+            <button id="nextPage" onclick="nextPage()">Siguiente</button>
+            <span>Página: <span id="currentPage">1</span></span>
+        </div>
+    </div>
 
     <script src="/js/sweetalert/swal2.js"></script>
     <script src="/js/jquery/jquery.js"></script>
