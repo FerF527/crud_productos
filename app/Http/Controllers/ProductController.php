@@ -75,14 +75,32 @@ class ProductController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $validated = $request->validate([
-            'title' => 'required|string|max:100',
-            'price' => 'required|numeric|min:0',
-        ]);
+        try {
+            // Validar los datos de entrada
+            $validated = $request->validate([
+                'title' => 'required|string|max:100',
+                'price' => 'required|numeric|min:0',
+            ]);
 
-        Product::update($id, $validated);
+            // Buscar el producto por ID
+            $product = Product::find($id);
 
-        return response()->json(['message' => 'Producto actualizado']);
+            if (!$product) {
+                return response()->json(['message' => 'Producto no encontrado'], 404);
+            }
+
+            // Actualizar el producto
+            Product::update($id, $validated);
+
+            return response()->json(['message' => 'Producto actualizado'], 200);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            // Capturar errores de validación
+            return response()->json(['message' => 'Error de validación', 'errors' => $e->errors()], 422);
+        } catch (\Exception $e) {
+            // Capturar cualquier otro error
+            return response()->json(['message' => 'Error al procesar la solicitud: ' . $e->getMessage()], 500);
+        }
     }
 
     /**

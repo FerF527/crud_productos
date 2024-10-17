@@ -223,8 +223,7 @@
             }
         }
 
-        //Editar producto
-
+        // Editar producto
         async function editProduct(id, title, price) {
             const {
                 value: formValues
@@ -266,15 +265,37 @@
                         body: JSON.stringify(formValues)
                     });
 
+                    const responseData = await response.json();
+
                     if (!response.ok) {
-                        throw new Error('Error al actualizar el producto');
+                        // Recolectar los errores de validación en un solo mensaje
+                        let errorMessages = '';
+                        if (responseData.errors) {
+                            for (const field in responseData.errors) {
+                                if (responseData.errors.hasOwnProperty(field)) {
+                                    responseData.errors[field].forEach(error => {
+                                        errorMessages += `<li style="color: red">${error}</li>`;
+                                    });
+                                }
+                            }
+                        }
+                        console.log("responseData",responseData);
+                        // Mostrar los errores
+                        Swal.fire({
+                            icon: 'error',
+                            title: responseData.message || 'Error al actualizar el producto',
+                            html: `<ul>${errorMessages}</ul>`,
+                        });
+
+                        return; 
                     }
 
-                    const result = await response.json();
-                    Swal.fire('Actualizado', 'El producto ha sido actualizado correctamente.', 'success');
+                    // Si no hay errores, mostrar el éxito
+                    Swal.fire('Actualizado', `El producto ha sido actualizado correctamente.`, 'success');
                     getProducts(); // Actualizar la lista de productos
+
                 } catch (error) {
-                    Swal.fire('Error', error.message, 'error');
+                    Swal.fire('Error', JSON.stringify(error.message), 'error');
                 }
             }
         }
