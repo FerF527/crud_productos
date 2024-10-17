@@ -103,12 +103,26 @@ class ProductController extends Controller
         }
     }
 
-    /**
-     * Eliminar producto.
-     */
+/**
+ * Eliminar producto.
+ */
     public function destroy(string $id)
     {
-        Product::delete($id);
-        return response()->json(['message' => 'Producto eliminado']);
+        try {
+            // Buscar el producto
+            $product = Product::find($id);
+
+            if (!$product) {
+                return response()->json(['message' => 'Producto no encontrado'], 404);
+            }
+
+            // Eliminar el producto
+            Product::delete($id);
+
+            return response()->json(['message' => 'Producto eliminado'], 200);
+
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Error al eliminar el producto: ' . $e->getMessage()], 500);
+        }
     }
 }

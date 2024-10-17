@@ -36,6 +36,10 @@ class Product
             }
         }
 
+        if (!$deleted_product) {
+            throw new \Exception("Producto no encontrado");
+        }
+    
         Storage::disk(self::$disk)->put(self::$file,json_encode($products, JSON_PRETTY_PRINT));
         // Registrar la acción en los logs
         Log::channel('product_logs')->info('Producto eliminado', [
@@ -52,7 +56,13 @@ class Product
     public static function create($data)
     {
         $products = self::all();
-        $data['id'] = end($products)['id'] + 1;
+        
+        //validar si existe un producto en el archivo
+        if ($products == null) {
+            $data['id'] = 1;
+        }else {
+            $data['id'] = end($products)['id'] + 1;
+        }
         $data['created_at'] = now()->format('Y-m-d H:i');
         $products[] = $data;
         Storage::disk(self::$disk)->put(self::$file,json_encode($products, JSON_PRETTY_PRINT));

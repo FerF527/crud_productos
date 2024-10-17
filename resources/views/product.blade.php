@@ -152,7 +152,14 @@
 
                 if (!response.ok) {
                     const errorData = await response.json();
-                    throw new Error(errorData.message || 'Error al eliminar el producto');
+                    let errorMessage = errorData.message || 'Error al eliminar el producto';
+
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: errorMessage
+                    });
+                    return;
                 }
 
                 await Swal.fire('OK', 'El producto ha sido eliminado.', 'success');
@@ -279,7 +286,7 @@
                                 }
                             }
                         }
-                        console.log("responseData",responseData);
+                        console.log("responseData", responseData);
                         // Mostrar los errores
                         Swal.fire({
                             icon: 'error',
@@ -287,7 +294,7 @@
                             html: `<ul>${errorMessages}</ul>`,
                         });
 
-                        return; 
+                        return;
                     }
 
                     // Si no hay errores, mostrar el éxito
