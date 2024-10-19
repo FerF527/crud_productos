@@ -177,7 +177,7 @@ return [
             'required' => 'El nombre no puede estar vacio.',
             'string' => 'El nombre  no puede ser un número.',
             'max' => [
-                'string' => 'El nombre no puede tener más de :max carácteres.',
+                'string' => 'El nombre no puede tener más de :max caracteres.',
             ],
         ],
         'price' => [

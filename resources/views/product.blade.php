@@ -16,8 +16,9 @@
         <div class="form-group">
             <h3>Agregar Producto</h3>
             <div class="form-box">
-                <input type="text" id="title" placeholder="Nombre del producto">
-                <input type="number" id="price" placeholder="Precio del producto">
+                <input type="text" id="title" placeholder="Nombre del producto" maxlength="50">
+                <input type="number" id="price" placeholder="Precio del producto"
+                    oninput="checkMinValue(this, 1)" oninput="checkMaxValue(this, 99999999)">
                 <button onclick="addProduct()">Agregar Producto</button>
             </div>
         </div>
@@ -67,6 +68,18 @@
         function applyFilters() {
             currentPage = 1;
             getProducts();
+        }
+        // Función para evitar que el número supere el máximo permitido
+        function checkMaxValue(input, maxValue) {
+            if (parseInt(input.value) > maxValue) {
+                input.value = maxValue;
+            }
+        }
+        // Función para evitar que el número sea menor a el mínimo permitido
+        function checkMinValue(input, minValue) {
+            if (parseInt(input.value) < minValue) {
+                input.value = minValue;
+            }
         }
         //Obtener todos los productos
         async function getProducts() {
@@ -238,9 +251,9 @@
                 title: 'Editar Producto',
                 html: `
             <label for="editTitle">Nombre</label>
-            <input type="text" id="editTitle" class="swal2-input" value="${title}">
+            <input type="text" id="editTitle" class="swal2-input" value="${title}" maxlength="50">
             <label for="editPrice">Precio</label>
-            <input type="number" id="editPrice" class="swal2-input" value="${price}">
+            <input type="number" id="editPrice" class="swal2-input" value="${price}" "oninput="checkMinValue(this, 1)" oninput="checkMaxValue(this, 99999999)">
         `,
                 focusConfirm: false,
                 showCancelButton: true,
@@ -292,7 +305,10 @@
                             icon: 'error',
                             title: responseData.message || 'Error al actualizar el producto',
                             html: `<ul>${errorMessages}</ul>`,
-                        });
+                        }).then(() => {
+                    // Reabrir el diálogo de edición tras el error
+                    editProduct(id, formValues.title, formValues.price);
+                });
 
                         return;
                     }
