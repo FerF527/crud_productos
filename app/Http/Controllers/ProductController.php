@@ -56,8 +56,8 @@ class ProductController extends Controller
         try {
             // Validar los datos de entrada
             $validated = $request->validate([
-                'title' => 'required|string|max:100',
-                'price' => 'required|numeric|min:0',
+                'title' => 'required|string|max:50',
+                'price' => 'required|numeric|min:1|max:99999999',
             ]);
             // Crear el producto
             $product = Product::create($validated);
@@ -78,8 +78,8 @@ class ProductController extends Controller
         try {
             // Validar los datos de entrada
             $validated = $request->validate([
-                'title' => 'required|string|max:100',
-                'price' => 'required|numeric|min:0',
+                'title' => 'required|string|max:50',
+                'price' => 'required|numeric|min:1|max:99999999',
             ]);
 
             // Buscar el producto por ID
