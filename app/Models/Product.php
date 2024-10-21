@@ -2,6 +2,8 @@
 
 namespace App\Models;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
+use Carbon\Carbon;
 
 class Product
 {
@@ -24,10 +26,28 @@ class Product
     public static function delete($id)
     {
         $products = self::all();
-        $products = array_filter($products, function ($product) use ($id) {
-            return $product['id'] != $id;
-        });
+        $deleted_product = [];
+        
+        foreach ($products as $index => $product) {
+            if ($product['id'] == $id) {
+                $deleted_product = $product;
+                unset($products[$index]);
+                break;
+            }
+        }
+
+        if (!$deleted_product) {
+            throw new \Exception("Producto no encontrado");
+        }
+    
         Storage::disk(self::$disk)->put(self::$file,json_encode($products, JSON_PRETTY_PRINT));
+        // Registrar la acción en los logs
+        Log::channel('product_logs')->info('Producto eliminado', [
+            'id' => $deleted_product['id'],
+            'title' => $deleted_product['title'],
+            'price' => $deleted_product['price'],
+            'deleted_at' => Carbon::now()->toDateTimeString()
+        ]);
     }
 
     /**
@@ -36,10 +56,23 @@ class Product
     public static function create($data)
     {
         $products = self::all();
-        $data['id'] = end($products)['id'] + 1;
+        
+        //validar si existe un producto en el archivo
+        if ($products == null) {
+            $data['id'] = 1;
+        }else {
+            $data['id'] = end($products)['id'] + 1;
+        }
         $data['created_at'] = now()->format('Y-m-d H:i');
         $products[] = $data;
         Storage::disk(self::$disk)->put(self::$file,json_encode($products, JSON_PRETTY_PRINT));
+        // Registrar la acción en los logs
+        Log::channel('product_logs')->info('Producto agregado', [
+            'id' => $data['id'],
+            'title' => $data['title'],
+            'price' => $data['price'],
+            'created_at' => $data['created_at']
+        ]);
         return $data;
     }
 
@@ -64,6 +97,13 @@ class Product
             }
         }
         Storage::disk(self::$disk)->put(self::$file,json_encode($products, JSON_PRETTY_PRINT));
+        // Registrar la acción en los logs
+        Log::channel('product_logs')->info('Producto actualizado', [
+            'id' => intval($id),
+            'title' => $data['title'],
+            'price' => $data['price'],
+            'updated_at'=> Carbon::now()->toDateTimeString()
+        ]);
     }
 
 }
