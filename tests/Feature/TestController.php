@@ -70,4 +70,40 @@ class TestController extends TestCase
         $this->assertEquals('Nuevo Producto', $products[0]['title']);
         $this->assertEquals(900, $products[0]['price']);
     }
+    /**
+     * Prueba para actualizar un producto.
+     */
+    public function test_update()
+    {
+        // Simular almacenamiento
+        Storage::fake('local');
+        $products = [
+            ['id' => 1, 'title' => 'Producto de prueba', 'price' => 1150, 'created_at' => now()],
+        ];
+        Storage::disk('local')->put('product.json', json_encode($products));
+
+        // Iniciar una sesión para generar un token CSRF
+        Session::start();
+
+        // Datos de actualización
+        $data = [
+            '_token' => csrf_token(), // Añadir el token CSRF
+            'title' => 'Producto Actualizado',
+            'price' => 200,
+        ];
+
+        // Hacer una solicitud PUT al endpoint de actualización
+        $response = $this->put('/product/1', $data);
+
+        // Verificar que el producto fue actualizado correctamente
+        $response->assertStatus(200)
+            ->assertJson([
+                'message' => 'Producto actualizado',
+            ]);
+
+        // Verificar que se guardó en el archivo
+        $updatedProducts = json_decode(Storage::disk('local')->get('product.json'), true);
+        $this->assertEquals('Producto Actualizado', $updatedProducts[0]['title']);
+        $this->assertEquals(200, $updatedProducts[0]['price']);
+    }
 }
