@@ -70,6 +70,7 @@ class TestController extends TestCase
         $this->assertEquals('Nuevo Producto', $products[0]['title']);
         $this->assertEquals(900, $products[0]['price']);
     }
+
     /**
      * Prueba para actualizar un producto.
      */
@@ -105,5 +106,36 @@ class TestController extends TestCase
         $updatedProducts = json_decode(Storage::disk('local')->get('product.json'), true);
         $this->assertEquals('Producto Actualizado', $updatedProducts[0]['title']);
         $this->assertEquals(200, $updatedProducts[0]['price']);
+    }
+
+    /**
+     * Prueba para eliminar un producto.
+     */
+    public function test_destroy()
+    {
+        // Simular almacenamiento
+        Storage::fake('local');
+        $products = [
+            ['id' => 1, 'title' => 'Producto de prueba', 'price' => 100, 'created_at' => now()],
+        ];
+        Storage::disk('local')->put('product.json', json_encode($products));
+
+        // Iniciar una sesión para generar un token CSRF
+        Session::start();
+
+        // Añadir el token CSRF como parte del encabezado
+        $response = $this->delete('/product/1', [
+            '_token' => csrf_token(),
+        ]);
+
+        // Verificar que el producto fue eliminado correctamente
+        $response->assertStatus(200)
+            ->assertJson([
+                'message' => 'Producto eliminado',
+            ]);
+
+        // Verificar que el producto fue removido del archivo
+        $remainingProducts = json_decode(Storage::disk('local')->get('product.json'), true);
+        $this->assertEmpty($remainingProducts);
     }
 }
