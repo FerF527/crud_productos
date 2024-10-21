@@ -34,6 +34,39 @@ class ModelTest extends TestCase
     }
 
     /**
+     * Prueba para editar un producto.
+     */
+    public function test_edit_product()
+    {
+        // Simular almacenamiento
+        Storage::fake('local');
+        $products = [
+            ['id' => 1, 'title' => 'Producto 1', 'price' => 100],
+            ['id' => 2, 'title' => 'Producto 2', 'price' => 200],
+        ];
+        Storage::disk('local')->put('product.json', json_encode($products));
+
+        // Datos de prueba
+        $productData = [
+            'title' => 'Producto de prueba',
+            'price' => 300,
+        ];
+
+        // Llamar a la función de editar producto
+        Product::update(2,$productData);
+
+        // Buscar el producto
+        $product = Product::find(2);
+
+        // Verificar que el producto se actualizo correctamente
+        $this->assertNotNull($product);
+        $this->assertEquals(2, $product['id']);
+        $this->assertEquals('Producto de prueba', $product['title']);
+        $this->assertEquals(300, $product['price']);
+
+    }
+
+    /**
      * Prueba para eliminar un producto.
      */
     public function test_delete_product()
