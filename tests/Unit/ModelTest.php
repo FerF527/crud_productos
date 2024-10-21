@@ -109,4 +109,33 @@ class ModelTest extends TestCase
         $this->assertEquals(2, $product['id']);
         $this->assertEquals('Producto 2', $product['title']);
     }
+
+    /**
+     * Prueba para obtener todos los productos.
+     */
+    public function test_products()
+    {
+        // Simular almacenamiento con un producto
+        Storage::fake('local');
+        $products = [
+            ['id' => 1, 'title' => 'Producto 1', 'price' => 300],
+            ['id' => 2, 'title' => 'Producto 2', 'price' => 500],
+        ];
+        Storage::disk('local')->put('product.json', json_encode($products));
+
+        // Buscar los productos
+        $list_product = Product::all();
+
+        // Verificar que el listado de productos no sea nulo.
+        $this->assertNotNull($list_product);
+
+        //producto 1
+        $this->assertEquals(1, $list_product[0]['id']);
+        $this->assertEquals('Producto 1', $list_product[0]['title']);
+        $this->assertEquals(300, $list_product[0]['price']);
+        //producto 2
+        $this->assertEquals(2, $list_product[1]['id']);
+        $this->assertEquals('Producto 2', $list_product[1]['title']);
+        $this->assertEquals(500, $list_product[1]['price']);
+    }
 }
