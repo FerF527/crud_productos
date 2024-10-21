@@ -6,7 +6,7 @@ use Tests\TestCase;
 use App\Models\Product;
 use Illuminate\Support\Facades\Storage;
 
-class ModelTest extends TestCase
+class TestModel extends TestCase
 {
     /**
      * Prueba para crear un producto.
